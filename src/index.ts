@@ -1,45 +1,52 @@
-import { input, closeInput } from "./readline";
+import { input, closeInput } from "./utils/readline";
 import { verTareas } from "./verTareas";
-import { arrayTareas } from "./data/tareas";
+import { arrayTareas as TareasIniciales } from "./data/tareas";
 import { buscarTarea } from "./buscarTarea";
 import { agregarTarea } from "./agregarTarea";
+import { Tarea } from "./models/tareaModelo";
+import { agregarNuevaTarea } from "./store/store";
 
 async function mostrarMenu(): Promise<void> {
-    console.log("\n---------------------\n");
-    console.log("Que desea hacer?\n");
+    console.log("\n---------------------");
+    console.log("Que desea hacer?");
     console.log("---------------------\n");
     console.log(`[1] Ver Mis Tareas.\n[2] Buscar una Tarea.\n[3] Agregar una Tarea.\n[0] Salir.\n`);
-    
+
 }
 
 
-async function preguntar(): Promise<void> {
+export async function preguntar(tareas:Tarea[]): Promise<void> {
+
+
     await mostrarMenu();
 
-    const opcion = parseInt(
-        await input(``)
-    );
+    const opcion: number = parseInt(await input(``));
 
     switch (opcion) {
         case 1:
-            await verTareas(arrayTareas);
+            await verTareas(tareas);
             break;
+
         case 2:
-            await buscarTarea(arrayTareas)
+            await buscarTarea(tareas)
             break;
 
         case 3:
-            await agregarTarea(arrayTareas);
-            break;
-        case 4:
+            const nuevaTarea: Tarea = await agregarTarea(tareas.length);
+            tareas = agregarNuevaTarea(tareas,nuevaTarea);
+            return preguntar(tareas);
+    
+
+        case 0:
             closeInput();
             return;
+
         default:
             console.log("Opción invalida");
     }
 
 
-    await preguntar();
+    await preguntar(tareas);
 }
 
-preguntar();
+preguntar(TareasIniciales);
